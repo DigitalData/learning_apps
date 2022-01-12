@@ -11,11 +11,18 @@
             "args": ["-d", "emulator-5554"]
         },
         {
+            "name": "My google pixel 3",
+            "request": "launch",
+            "type": "dart",
+            "args": ["-d", "8ADX0QPPS"]
+        },
+        {
             "name": "learning_apps (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile",
             "args": ["-d", "emulator-5554"]
         }
+
     ]
 }
