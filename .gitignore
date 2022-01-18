@@ -46,6 +46,7 @@ app.*.map.json
 /android/app/release
 
 # Secrets Contained Here
-android/app/src/main/AndroidManifest.xml
-ios/Runner/AppDelegate.swift
-web/index.html
+/web/index.html
+/ios/Runner/AppDelegate.swift
+/android/app/src/main/AndroidManifest.xml
+.env
