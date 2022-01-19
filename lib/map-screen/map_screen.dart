@@ -2,9 +2,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 import '../settings.dart';
-import './scrollable_list.dart';
+import './pet_list.dart';
 
 class MapScreen extends StatefulWidget {
   @override
@@ -17,6 +18,8 @@ class _MapScreenState extends State<MapScreen> {
   final LatLng _actPosition = const LatLng(-35.3035, 149.1227);
   late LatLng _currentPosition =
       (markers.isEmpty ? _actPosition : markers.values.first.position);
+
+  late ScrollController _scrollController;
 
   /// FUNCTIONS
 
@@ -64,52 +67,95 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   double _scrollHeight() {
-    return 80;
+    return 120;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Sample Map App"),
-        backgroundColor: primaryColour,
-        actions: <Widget>[
-          IconButton(onPressed: _randomTravel, icon: const Icon(Icons.flight))
-        ],
-      ),
-      body: Stack(
-        children: <Widget>[
-          GoogleMap(
-            padding: EdgeInsets.only(bottom: _scrollHeight()),
-            onMapCreated: _onMapCreated,
-            onCameraMove: _onCameraMove,
-            markers: markers.values.toSet(),
-            initialCameraPosition:
-                CameraPosition(target: _currentPosition, zoom: 11.0),
-            zoomControlsEnabled: false,
-          ),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: FloatingActionButton(
-                    child: const Icon(Icons.save),
-                    backgroundColor: primaryColour,
-                    onPressed: _saveCurrentLocation)),
-          ),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: FloatingActionButton(
-                  child: const Icon(Icons.travel_explore_rounded),
-                  backgroundColor: primaryColour,
-                  onPressed: _randomTravel),
+        appBar: AppBar(
+          title: const Text("Sample Map App"),
+          backgroundColor: primaryColour,
+          actions: <Widget>[
+            IconButton(onPressed: _randomTravel, icon: const Icon(Icons.flight))
+          ],
+        ),
+        body: SlidingUpPanel(
+          body: Stack(children: <Widget>[
+            GoogleMap(
+              padding: EdgeInsets.only(bottom: _scrollHeight()),
+              onMapCreated: _onMapCreated,
+              onCameraMove: _onCameraMove,
+              markers: markers.values.toSet(),
+              initialCameraPosition:
+                  CameraPosition(target: _currentPosition, zoom: 11.0),
+              zoomControlsEnabled: false,
             ),
-          ),
-          ScrollableList()
-        ],
-      ),
-    );
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                  padding: const EdgeInsets.only(bottom: 128, right: 16),
+                  child: FloatingActionButton(
+                      child: const Icon(Icons.save),
+                      backgroundColor: primaryColour,
+                      onPressed: _saveCurrentLocation)),
+            ),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 128, left: 16),
+                child: FloatingActionButton(
+                    child: const Icon(Icons.travel_explore_rounded),
+                    backgroundColor: primaryColour,
+                    onPressed: _randomTravel),
+              ),
+            ),
+          ]),
+          borderRadius: radius,
+          minHeight: 30,
+          panelBuilder: (ScrollController sc) {
+            _scrollController = sc;
+            return VerticalPetList(
+                pets: PetItem.testingPetList(), scrollController: sc);
+          },
+          // collapsed: Container(
+          //   child: HorizontalPetList(pets: PetItem.testingPetList()),
+          // ),
+        )
+
+        // Stack(
+        //   children: <Widget>[
+        //     GoogleMap(
+        //       padding: EdgeInsets.only(bottom: _scrollHeight()),
+        //       onMapCreated: _onMapCreated,
+        //       onCameraMove: _onCameraMove,
+        //       markers: markers.values.toSet(),
+        //       initialCameraPosition:
+        //           CameraPosition(target: _currentPosition, zoom: 11.0),
+        //       zoomControlsEnabled: false,
+        //     ),
+        //     Align(
+        //       alignment: Alignment.bottomRight,
+        //       child: Padding(
+        //           padding: const EdgeInsets.all(16),
+        //           child: FloatingActionButton(
+        //               child: const Icon(Icons.save),
+        //               backgroundColor: primaryColour,
+        //               onPressed: _saveCurrentLocation)),
+        //     ),
+        //     Align(
+        //       alignment: Alignment.bottomLeft,
+        //       child: Padding(
+        //         padding: const EdgeInsets.all(16),
+        //         child: FloatingActionButton(
+        //             child: const Icon(Icons.travel_explore_rounded),
+        //             backgroundColor: primaryColour,
+        //             onPressed: _randomTravel),
+        //       ),
+        //     ),
+        //     ScrollableList()
+        //   ],
+        // ),
+        );
   }
 }
