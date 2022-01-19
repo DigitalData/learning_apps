@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
 import '../settings.dart';
+import './scrollable_list.dart';
 
 class MapScreen extends StatefulWidget {
   @override
@@ -12,13 +13,10 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late GoogleMapController mapController;
-
   final Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
-
-  // Starting position on map.
-  final LatLng _ACT = const LatLng(-35.3035, 149.1227);
+  final LatLng _actPosition = const LatLng(-35.3035, 149.1227);
   late LatLng _currentPosition =
-      (markers.isEmpty ? _ACT : markers.values.first.position);
+      (markers.isEmpty ? _actPosition : markers.values.first.position);
 
   /// FUNCTIONS
 
@@ -108,7 +106,8 @@ class _MapScreenState extends State<MapScreen> {
                   backgroundColor: primaryColour,
                   onPressed: _randomTravel),
             ),
-          )
+          ),
+          ScrollableList()
         ],
       ),
     );
