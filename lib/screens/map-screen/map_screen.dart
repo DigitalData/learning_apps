@@ -1,10 +1,12 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
-import '../settings.dart';
+import '../../settings.dart';
 import './pet_list.dart';
+import './pet_item.dart';
 
 class MapScreen extends StatefulWidget {
   @override
@@ -29,11 +31,11 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   late GoogleMapController mapController;
   final PanelController _pc = PanelController();
-  final Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   late Map<String, PetItem> pets = PetItem.testingPetList();
   final LatLng _actPosition = const LatLng(-35.3035, 149.1227);
-  late LatLng _currentPosition =
-      (markers.isEmpty ? _actPosition : pets.values.first.position);
+  late LatLng _currentPosition = _actPosition;
+  // (pets.isEmpty ? _actPosition : pets.values.first.marker.position);
+  double _mapPadding = 116;
 
   late ScrollController _scrollController;
 
@@ -44,20 +46,8 @@ class _MapScreenState extends State<MapScreen> {
     for (var pet in pets.values) {
       pet.mapController = controller;
     }
-  }
 
-  void _saveCurrentLocation() {
-    final id = MarkerId(markers.length.toString());
-    final pos = _currentPosition;
-    final newMarker = Marker(
-        markerId: id,
-        position: pos,
-        infoWindow: InfoWindow(
-            title: id.toString(), snippet: id.toString() + "th marker"));
-
-    setState(() {
-      markers[id] = newMarker;
-    });
+    _travel(pets.values.first.marker.position);
   }
 
   void _onCameraMove(CameraPosition pos) {
@@ -66,22 +56,39 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
+  void _travel(LatLng pos) {
+    mapController.animateCamera(CameraUpdate.newLatLng(pos));
+  }
+
   void _randomTravel() {
-    mapController
-        .animateCamera(CameraUpdate.newLatLng(MapScreen.randomLatLng()));
+    _travel(MapScreen.randomLatLng());
   }
 
   double _panelHeight() {
     if (!_pc.isAttached) return 84;
-    return (_pc.panelPosition) * 320 + 116;
+    return (_pc.panelPosition) *
+            (Settings.panel.maxHeight - Settings.panel.minHeight) +
+        116;
+  }
+
+  void _onPanelSlide(double pos) {
+    setState(() {
+      _mapPadding = (_pc.panelPosition) *
+              (Settings.panel.maxHeight - Settings.panel.minHeight) +
+          110;
+    });
+  }
+
+  Set<Marker> _getMarkers() {
+    return pets.values.map((p) => p.marker).toSet();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Sample Map App"),
-          backgroundColor: primaryColour,
+          title: const Text("Sample Pet Tracker App"),
+          backgroundColor: Settings.colours.primary,
           actions: <Widget>[
             IconButton(onPressed: _randomTravel, icon: const Icon(Icons.flight))
           ],
@@ -90,39 +97,22 @@ class _MapScreenState extends State<MapScreen> {
           controller: _pc,
           body: Stack(children: <Widget>[
             GoogleMap(
-              padding: EdgeInsets.only(left: 8, bottom: _panelHeight()),
+              padding: EdgeInsets.only(left: 8, bottom: _mapPadding),
               onMapCreated: _onMapCreated,
               onCameraMove: _onCameraMove,
               // markers: markers.values.toSet(),
-              markers: pets.values.toSet(),
+              markers: _getMarkers(),
               initialCameraPosition:
                   CameraPosition(target: _currentPosition, zoom: 11.0),
               zoomControlsEnabled: false,
             ),
-            // Align(
-            //   alignment: Alignment.bottomRight,
-            //   child: Padding(
-            //       padding: const EdgeInsets.only(bottom: 128, right: 16),
-            //       child: FloatingActionButton(
-            //           child: const Icon(Icons.save),
-            //           backgroundColor: primaryColour,
-            //           onPressed: _saveCurrentLocation)),
-            // ),
-            // Align(
-            //   alignment: Alignment.bottomLeft,
-            //   child: Padding(
-            //     padding: const EdgeInsets.only(bottom: 128, left: 16),
-            //     child: FloatingActionButton(
-            //         child: const Icon(Icons.travel_explore_rounded),
-            //         backgroundColor: primaryColour,
-            //         onPressed: _randomTravel),
-            //   ),
-            // ),
           ]),
-          borderRadius: radius,
-          minHeight: 30,
-          maxHeight: 350,
+          borderRadius: Settings.borderRadius,
+          minHeight: Settings.panel.minHeight,
+          maxHeight: Settings.panel.maxHeight,
+          onPanelSlide: _onPanelSlide,
           panelSnapping: false,
+          color: Settings.colours.primary,
           panelBuilder: (ScrollController sc) {
             _scrollController = sc;
             return VerticalPetList(pets: pets, scrollController: sc);
@@ -149,7 +139,7 @@ class _MapScreenState extends State<MapScreen> {
         //           padding: const EdgeInsets.all(16),
         //           child: FloatingActionButton(
         //               child: const Icon(Icons.save),
-        //               backgroundColor: primaryColour,
+        //               backgroundColor: Settings.colours.primary,
         //               onPressed: _saveCurrentLocation)),
         //     ),
         //     Align(
@@ -158,7 +148,7 @@ class _MapScreenState extends State<MapScreen> {
         //         padding: const EdgeInsets.all(16),
         //         child: FloatingActionButton(
         //             child: const Icon(Icons.travel_explore_rounded),
-        //             backgroundColor: primaryColour,
+        //             backgroundColor: Settings.colours.primary,
         //             onPressed: _randomTravel),
         //       ),
         //     ),
