@@ -15,14 +15,6 @@ class PetItem {
   final String? type;
   final String? description;
   final Image? img;
-  // late Widget avatar = Border(CircleAvatar(
-  //     backgroundColor: Settings.colours.tertiary,
-  //     foregroundColor: Colors.white,
-  //     child: (img ?? Text(name.substring(0, 2)))));
-
-  // late final Screenshot _sc =
-  //     Screenshot(controller: screenshotController, child: avatar);
-
   Marker marker;
 
   PetItem(
